@@ -26,6 +26,13 @@ public class POLYGON_CameraController : MonoBehaviour
     float MouseX;
     void Start()
     {
+        // Make the game run as fast as possible
+        Application.targetFrameRate = -1;
+        // Limit the framerate to 60
+        Application.targetFrameRate = 120;
+        // Sync the frame rate to the screen's refresh rate
+        QualitySettings.vSyncCount = 0;
+    
         //camera start
         distance = transform.position.y - target.position.y;
         position = new Vector3(target.position.x, target.position.y + distance, target.position.z);
