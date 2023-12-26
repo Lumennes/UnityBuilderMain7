@@ -44,6 +44,8 @@ jobs:
         providerStrategy:
           # - local-docker
           - local
+        projectName:
+          - UnityTester
         projectPath:
           - test-project
         unityVersion:
@@ -75,8 +77,9 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: ${{ matrix.projectPath }}/Library
-          key: Library-${{ matrix.projectPath }}-ubuntu-${{ matrix.targetPlatform }}
+          key: Library-${{ matrix.projectPath }}-ubuntu-${{ matrix.targetPlatform }}-${{ matrix.unityVersion }}
           restore-keys: |
+            Library-${{ matrix.projectPath }}-ubuntu-${{ matrix.targetPlatform }}
             Library-${{ matrix.projectPath }}-ubuntu-
             Library-
 
@@ -96,6 +99,8 @@ jobs:
           targetPlatform: ${{ matrix.targetPlatform }}
           customParameters: -profile SomeProfile -someBoolean -someValue exampleValue
           providerStrategy: ${{ matrix.providerStrategy }}
+          buildMethod: UnityBuilderAction.BuildScript.Build
+          buildName: UnityTester
 
       - name: Sleep for Retry
         if: ${{ steps.build-1.outcome == 'failure' }}
@@ -116,6 +121,8 @@ jobs:
           targetPlatform: ${{ matrix.targetPlatform }}
           customParameters: -profile SomeProfile -someBoolean -someValue exampleValue
           providerStrategy: ${{ matrix.providerStrategy }}
+          buildMethod: UnityBuilderAction.BuildScript.Build
+          buildName: UnityTester
           allowDirtyBuild: true
 
       - name: Sleep for Retry
@@ -136,13 +143,22 @@ jobs:
           targetPlatform: ${{ matrix.targetPlatform }}
           customParameters: -profile SomeProfile -someBoolean -someValue exampleValue
           providerStrategy: ${{ matrix.providerStrategy }}
+          buildMethod: UnityBuilderAction.BuildScript.Build
+          buildName: UnityTester
           allowDirtyBuild: true
 
       ###########################
       #          Upload         #
       ###########################
-      - uses: actions/upload-artifact@v3
+      # - uses: actions/upload-artifact@v3
+        # with:
+          # name: Build ${{ matrix.targetPlatform }} (${{ matrix.unityVersion }})
+          # path: build/${{ matrix.targetPlatform }}
+          # retention-days: 14
+          
+      - uses: Difegue/action-megacmd@master
         with:
-          name: Build ${{ matrix.targetPlatform }} (${{ matrix.unityVersion }})
-          path: build/${{ matrix.targetPlatform }}
-          retention-days: 14
+          args: put -c build/${{ matrix.targetPlatform }} /Unity_projects/${{ matrix.projectName }}/${{ matrix.projectName }}_${{ matrix.unityVersion }}_${{ matrix.targetPlatform }}/
+        env:
+          USERNAME: ${{ secrets.MEGA_USERNAME }}
+          PASSWORD: ${{ secrets.MEGA_PASSWORD }}
